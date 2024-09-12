@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyScript Game</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+        }
+        canvas {
+            background-color: black;
+            display: block;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<py-script>
+import js
+from pyodide import create_once_callable
+
+canvas = js.document.getElementById("gameCanvas")
+ctx = canvas.getContext("2d")
+
+player_x = 400
+player_y = 550
+player_speed = 7
+
+target_x = js.Math.random() * 750
+target_y = -50
+target_speed = 5
+
+lives = 3
+score = 0
+
+def draw_player():
+    ctx.fillStyle = "white"
+    ctx.fillRect(player_x, player_y, 50, 50)
+
+def draw_target():
+    ctx.fillStyle = "red"
+    ctx.fillRect(target_x, target_y, 50, 50)
+
+def update_game():
+    global player_x, target_x, target_y, score, lives
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    
+    # Move player
+    if js.window.pressed_keys.get("ArrowLeft") and player_x > 0:
+        player_x -= player_speed
+    if js.window.pressed_keys.get("ArrowRight") and player_x < 750:
+        player_x += player_speed
+    
+    # Move target
+    target_y += target_speed
+    
+    # Check for collision
+    if player_x < target_x + 50 and player_x + 50 > target_x and player_y < target_y + 50 and player_y + 50 > target_y:
+        score += 1
+        target_x = js.Math.random() * 750
+        target_y = -50
+    
+    # Reset target if it goes off screen
+    if target_y > 600:
+        lives -= 1
+        target_x = js.Math.random() * 750
+        target_y = -50
+    
+    # Draw everything
+    draw_player()
+    draw_target()
+    
+    # Display score and lives
+    ctx.fillStyle = "white"
+    ctx.font = "20px Arial"
+    ctx.fillText(f"Score: {score}", 10, 20)
+    ctx.fillText(f"Lives: {lives}", 10, 50)
+    
+    if lives > 0:
+        js.window.requestAnimationFrame(update_game_callable)
+    else:
+        ctx.fillText("Game Over", 350, 300)
+
+# Initialize key tracking
+js.window.pressed_keys = {}
+
+def keydown_handler(event):
+    js.window.pressed_keys[event.key] = True
+
+def keyup_handler(event):
+    js.window.pressed_keys[event.key] = False
+
+# Attach key event handlers
+js.window.addEventListener("keydown", create_once_callable(keydown_handler))
+js.window.addEventListener("keyup", create_once_callable(keyup_handler))
+
+# Wrap update_game in a callable proxy
+update_game_callable = create_once_callable(update_game)
+
+# Start the game loop
+js.window.requestAnimationFrame(update_game_callable)
+
+</py-script>
+
+</body>
+</html>
