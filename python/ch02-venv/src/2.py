@@ -1,3 +1,7 @@
+'''
+    크롤링 실습 : 원하는 웹페이지의 하이퍼링크와 텍스트 검출해보기
+'''
+
 import requests
 from bs4 import BeautifulSoup
 

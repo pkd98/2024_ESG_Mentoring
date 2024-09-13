@@ -1,3 +1,8 @@
+'''
+    [뉴스기사 크롤링과 데이터시각화 실습]
+    - 연합뉴스 사이트에서 기사 제목을 추출하고, 워드클라우드 형태로 빈도수에 따라 글자 크기를 구별하여 시각화하기
+'''
+
 import requests
 from bs4 import BeautifulSoup
 from wordcloud import WordCloud
